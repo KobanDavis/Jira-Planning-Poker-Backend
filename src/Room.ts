@@ -1,6 +1,5 @@
-import RoomManager from './RoomManager'
 import io from './io'
-import { Events, Game } from './types'
+import { Game } from './types'
 
 class Room {
 	private _state: Game.State = Game.State.LOBBY
