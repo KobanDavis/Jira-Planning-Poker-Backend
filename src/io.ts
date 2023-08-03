@@ -1,9 +1,7 @@
-import dotenv from 'dotenv'
 import http from 'http'
 import { Server } from 'socket.io'
 import { Events } from './types'
 
-dotenv.config()
 const port = process.env.PORT || 5000
 
 const server = http.createServer()

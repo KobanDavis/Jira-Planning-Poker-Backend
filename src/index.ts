@@ -1,7 +1,7 @@
 import Room from './Room'
 import RoomManager from './RoomManager'
 import io from './io'
-import { Events, Game } from './types'
+import { Game } from './types'
 
 const timeoutMap: Record<string, NodeJS.Timeout> = {}
 const timeouts = {
