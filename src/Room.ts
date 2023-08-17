@@ -4,19 +4,23 @@ import { Game } from './types'
 class Room {
 	private _state: Game.State = Game.State.LOBBY
 	private _players = new Map<string, Game.Player>()
-	private _history = new Map<string, Game.Round>()
 	private _cards = new Map<string, Game.Card>()
 
-	public id: string = Math.random().toString().slice(2, 8)
+	private _rounds = new Map<string, Game.Round>()
+	private _currentRound: string = ''
 
-	constructor(public ownerId: string) {}
+	public id: string
+
+	constructor(public name: string, public ownerId: string, public sprintId: number) {
+		this.id = ownerId
+	}
 
 	private _playerWithoutSocket(player: Game.Player): Game.ClientPlayer {
 		return Object.assign({}, player, { socket: undefined })
 	}
 
-	private _values<T, K>(map: Map<T, K>) {
-		return Array.from(map.values())
+	private _values<T, K>(iterable: Map<T, K> | Set<K>) {
+		return Array.from(iterable.values())
 	}
 
 	private _getPlayersArray() {
@@ -26,25 +30,47 @@ class Room {
 	private _initPlayer(player: Game.Player) {
 		player.socket.emit('ingame/init', {
 			cards: this._values(this._cards),
-			history: this._values(this._history),
-			self: this._playerWithoutSocket(player)
+			rounds: this._values(this._rounds),
+			self: this._playerWithoutSocket(player),
+			currentRound: this._currentRound,
+			state: this._state
 		})
 
 		io.to(this.id).emit('ingame/players', this._getPlayersArray())
-		io.to(this.id).emit('ingame/state', this._state)
 	}
 
 	private _subscribeToEvents(player: Game.Player) {
-		player.socket.on('ingame/state', (state) => {
-			this._state = state
-			io.to(this.id).emit('ingame/state', this._state)
-		})
+		if (player.role === 'owner') {
+			player.socket.on('ingame/state', (state) => {
+				this._state = state
+				io.to(this.id).emit('ingame/state', this._state)
+			})
+			player.socket.on('ingame/rounds', (rounds) => {
+				rounds.forEach((round) => {
+					this._rounds.set(round.id, round)
+				})
+				io.to(this.id).emit('ingame/rounds', rounds)
+			})
+			player.socket.on('ingame/round', (round) => {
+				this._rounds.set(round.id, round)
+				const rounds = this._values(this._rounds)
+				io.to(this.id).emit('ingame/rounds', rounds)
+			})
+			player.socket.on('ingame/currentRound', (round) => {
+				this._currentRound = round
+				io.to(this.id).emit('ingame/currentRound', this._currentRound)
+			})
+		}
 
 		player.socket.on('ingame/card', (card) => {
 			this._cards.set(card.id, card)
 			const cards = this._values(this._cards)
-			player.socket.broadcast.to(this.id).emit('ingame/cards', cards)
+			io.to(this.id).emit('ingame/cards', cards)
 		})
+	}
+
+	public hasRounds() {
+		return this._rounds.size > 0
 	}
 
 	public teardown() {

@@ -1,8 +1,8 @@
 import Room from './Room'
 
 class RoomManager extends Map<string, Room> {
-	public create(ownerId: string) {
-		const room = new Room(ownerId)
+	public create(name: string, ownerId: string, sprintId: number) {
+		const room = new Room(name, ownerId, sprintId)
 		this.set(room.id, room)
 		return room
 	}

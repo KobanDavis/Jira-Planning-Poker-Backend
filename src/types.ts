@@ -1,6 +1,12 @@
 import { Socket } from 'socket.io'
 
 export namespace Game {
+	export enum Resolution {
+		TODO,
+		ACCEPTED,
+		REJECTED
+	}
+
 	export enum State {
 		NOT_JOINED,
 		LOBBY,
@@ -31,22 +37,30 @@ export namespace Game {
 		id: string
 		value: string
 		title: string
+		resolution: Resolution
 	}
 }
 
 export namespace Events {
 	export interface ClientToServer {
 		ping: (cb: () => void) => void
-		'room/create': (playerId: string, cb: (roomId: string) => void) => void
-		'room/join': (data: { name: string; id: string; roomId: string }) => void
+		'room/create': (data: { playerId: string; roomName: string; sprintId: number }, cb: (roomId: string) => void) => void
+		'room/name': (id: string, cb: (name: string) => void) => void
+		'room/exists': (id: string, cb: (exists: boolean) => void) => void
+		'room/join': (data: { name: string; id: string; roomId: string }, cb: (sprintId: number | undefined) => void) => void
 		'ingame/state': (state: Game.State) => void
 		'ingame/card': (cards: Game.Card) => void
+		'ingame/rounds': (rounds: Game.Round[]) => void
+		'ingame/round': (rounds: Game.Round) => void
+		'ingame/currentRound': (roundId: string) => void
 	}
 
 	export interface ServerToClient {
-		'ingame/init': (data: { cards: Game.Card[]; history: Game.Round[]; self: Game.ClientPlayer }) => void
+		'ingame/init': (data: { cards: Game.Card[]; self: Game.ClientPlayer; rounds: Game.Round[]; currentRound: string; state: Game.State }) => void
 		'ingame/state': (state: Game.State) => void
 		'ingame/cards': (cards: Game.Card[]) => void
+		'ingame/rounds': (rounds: Game.Round[]) => void
 		'ingame/players': (players: Game.ClientPlayer[]) => void
+		'ingame/currentRound': (roundId: string) => void
 	}
 }

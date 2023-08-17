@@ -22,20 +22,26 @@ const timeouts = {
 
 io.on('connection', (socket) => {
 	socket.on('ping', (cb) => cb())
-	socket.once('room/create', (playerId, cb) => {
-		const room = RoomManager.create(playerId)
-		console.log('room/create', room.id)
+	socket.on('room/name', (roomId, cb) => {
+		const room = RoomManager.get(roomId)
+		if (!room) return console.log('err@room/name: room does not exist:', roomId)
+		cb(room.name)
+	})
+	socket.on('room/exists', (roomId, cb) => cb(RoomManager.has(roomId)))
+	socket.once('room/create', ({ roomName, playerId, sprintId }, cb) => {
+		const room = RoomManager.create(roomName, playerId, sprintId)
+		console.log('room/create', room.id, playerId)
 		timeouts.room(room)
 		cb(room.id)
 	})
 
-	socket.once('room/join', ({ name, id, roomId }) => {
+	socket.once('room/join', ({ name, id, roomId }, cb) => {
 		console.log('room/join', name, socket.id)
 
 		const room = RoomManager.get(roomId)
 
 		if (!room) {
-			return console.log('err: room does not exist:', roomId)
+			return console.log('err@room/join: room does not exist:', roomId)
 		}
 
 		const player: Game.Player = { id, name, role: id === room.ownerId ? 'owner' : 'player', socket }
@@ -45,5 +51,7 @@ io.on('connection', (socket) => {
 
 		socket.once('disconnect', () => timeouts.player(player, room))
 		room.connect(player)
+
+		cb(room.hasRounds() === false ? room.sprintId : undefined)
 	})
 })
