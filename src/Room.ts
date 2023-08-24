@@ -60,6 +60,10 @@ class Room {
 				this._currentRound = round
 				io.to(this.id).emit('ingame/currentRound', this._currentRound)
 			})
+			player.socket.on('ingame/cards', (cards) => {
+				this._cards = new Map(cards.map((card) => [card.id, card]))
+				io.to(this.id).emit('ingame/cards', this._values(this._cards))
+			})
 		}
 
 		player.socket.on('ingame/card', (card) => {

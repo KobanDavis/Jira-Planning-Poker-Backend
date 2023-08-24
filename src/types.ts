@@ -49,7 +49,8 @@ export namespace Events {
 		'room/exists': (id: string, cb: (exists: boolean) => void) => void
 		'room/join': (data: { name: string; id: string; roomId: string }, cb: (sprintId: number | undefined) => void) => void
 		'ingame/state': (state: Game.State) => void
-		'ingame/card': (cards: Game.Card) => void
+		'ingame/card': (card: Game.Card) => void
+		'ingame/cards': (cards: Game.Card[]) => void
 		'ingame/rounds': (rounds: Game.Round[]) => void
 		'ingame/round': (rounds: Game.Round) => void
 		'ingame/currentRound': (roundId: string) => void
