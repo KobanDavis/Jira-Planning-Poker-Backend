@@ -4,7 +4,8 @@ export namespace Game {
 	export enum Resolution {
 		TODO,
 		ACCEPTED,
-		REJECTED
+		REJECTED,
+		REVIEWING
 	}
 
 	export enum State {

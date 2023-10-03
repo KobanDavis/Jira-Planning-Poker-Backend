@@ -51,11 +51,6 @@ class Room {
 				})
 				io.to(this.id).emit('ingame/rounds', rounds)
 			})
-			player.socket.on('ingame/round', (round) => {
-				this._rounds.set(round.id, round)
-				const rounds = this._values(this._rounds)
-				io.to(this.id).emit('ingame/rounds', rounds)
-			})
 			player.socket.on('ingame/currentRound', (round) => {
 				this._currentRound = round
 				io.to(this.id).emit('ingame/currentRound', this._currentRound)
@@ -66,10 +61,18 @@ class Room {
 			})
 		}
 
+		player.socket.on('ingame/round', (round) => {
+			this._rounds.set(round.id, round)
+			const rounds = this._values(this._rounds)
+			io.to(this.id).emit('ingame/rounds', rounds)
+		})
+
 		player.socket.on('ingame/card', (card) => {
-			this._cards.set(card.id, card)
-			const cards = this._values(this._cards)
-			io.to(this.id).emit('ingame/cards', cards)
+			if (this._state === Game.State.INGAME) {
+				this._cards.set(card.id, card)
+				const cards = this._values(this._cards)
+				io.to(this.id).emit('ingame/cards', cards)
+			}
 		})
 	}
 

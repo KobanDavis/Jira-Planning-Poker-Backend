@@ -23,7 +23,7 @@ const server = protocol
 		res.writeHead(200)
 		res.end('hello world\n')
 	})
-	.listen(port, () => console.log('Server started on port ' + port))
+	.listen(port, () => console.log(`Server started on port ${port}`))
 
 const io = new Server<Events.ClientToServer, Events.ServerToClient>(server, { cors: { origin: '*' } })
 
