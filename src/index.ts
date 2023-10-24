@@ -17,6 +17,9 @@ const timeouts = {
 	player(player: Game.Player, room: Room) {
 		console.log('timeout/player', player.name)
 		timeoutMap[player.id] = setTimeout(() => room.disconnect(player), 10000)
+		if (room.players === 0) {
+			timeouts.room(room)
+		}
 	}
 }
 

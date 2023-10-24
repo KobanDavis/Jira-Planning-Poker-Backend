@@ -104,14 +104,13 @@ class Room {
 
 	public disconnect(player: Game.Player) {
 		console.log('room/disconnect', player.name)
-
 		player.socket.leave(this.id)
 		this._players.delete(player.id)
+		io.to(this.id).emit('ingame/players', this._getPlayersArray())
+	}
 
-		// if (this._players.size === 0) {
-		// 	console.log('room/delete', this.id)
-		// 	RoomManager.delete(this.id)
-		// }
+	public get players() {
+		return this._players.size
 	}
 }
 
